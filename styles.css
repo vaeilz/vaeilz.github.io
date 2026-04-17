@@ -1,0 +1,205 @@
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff66cc20, transparent 40%);
+  pointer-events: none;
+  transition: background-position 0.1s linear;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(270deg, #0e0e1e, #1a1a2e, #220033);
+  background-size: 400% 400%;
+  animation: bgShift 20s ease infinite;
+  color: #f0f0ff;
+  font-family: 'Press Start 2P', monospace;
+  padding-bottom: 100px;
+  overflow-x: hidden;
+}
+
+@keyframes bgShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* -------------------------------
+   HEADER + TEXT
+--------------------------------*/
+header {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.neon {
+  color: #ff66cc;
+  text-shadow: 0 0 4px #ff66cc, 0 0 10px #ff66cc, 0 0 20px #660066;
+}
+
+.tagline {
+  color: #99ffff;
+  margin-top: 10px;
+}
+
+.section {
+  border: 1px solid #660066;
+  border-radius: 10px;
+  box-shadow: 0 0 8px #ff66cc;
+  animation: pulse 3s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { box-shadow: 0 0 8px #ff66cc; }
+  to   { box-shadow: 0 0 20px #ff99ff; }
+}
+
+
+.section h2 {
+  color: #ff99ff;
+  margin-bottom: 15px;
+  text-shadow: 0 0 6px #ff66cc;
+}
+
+ul {
+  list-style: none;
+}
+
+ul li {
+  margin-bottom: 10px;
+  color: #ccccff;
+}
+
+/* -------------------------------
+   GALLERY
+--------------------------------*/
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #ff66cc;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 10px #ff66cc40;
+}
+
+.gallery-grid img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #ff66cc;
+}
+
+/* -------------------------------
+   NEURO IMAGE (CORNER)
+--------------------------------*
+#neuro-corner {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: auto;
+  image-rendering: pixelated;
+  cursor: pointer;
+  transform-origin: center center;
+
+  /* expose var used by JS for glow */
+  /* --neuro-glow: 8px; */
+
+  /* base filter reads the CSS var *
+  filter: drop-shadow(0 0 calc(var(--neuro-glow)) #ff66cc)
+          drop-shadow(0 0 calc(calc(var(--neuro-glow) * 2)) #ff66cc);
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+
+/* -------------------------------
+   FOOTER
+--------------------------------*/
+footer {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  font-size: 0.8em;
+}
+
+#neuro-corner:hover {
+  filter:
+    drop-shadow(0 0 10px #ff99ff)
+    drop-shadow(0 0 25px #ff66cc)
+    drop-shadow(0 0 40px #ff66cc);
+  transform: scale(1.05);
+  transition: filter 0.3s ease;
+}
+
+#neuro-bubble {
+  max-width: 160px;
+  text-align: center;
+  line-height: 1.4;
+  box-shadow: 0 0 10px #ff66cc80;
+}
+
+/* The rotating container */
+#neuro-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: auto;
+  transform-origin: center center;
+  cursor: pointer;
+}
+
+/* The image itself handles glow/glitch visuals */
+#neuro-corner {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px #ff66cc) drop-shadow(0 0 16px #ff66cc);
+  transition: filter 0.18s ease;
+}
+
+/* Glitch effect only manipulates filter now */
+@keyframes neuroGlitch {
+  0% {
+    filter: drop-shadow(0 0 8px #ff66cc) drop-shadow(0 0 16px #ff66cc);
+  }
+  25% {
+    filter: drop-shadow(0 0 16px #66ffff) drop-shadow(0 0 32px #66ffff) hue-rotate(45deg) blur(1px);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px #ff33aa) drop-shadow(0 0 20px #ff33aa) hue-rotate(-45deg) blur(1.2px);
+  }
+  75% {
+    filter: drop-shadow(0 0 12px #ff99ff) drop-shadow(0 0 24px #ff99ff) hue-rotate(15deg) blur(0.6px);
+  }
+  100% {
+    filter: drop-shadow(0 0 8px #ff66cc) drop-shadow(0 0 16px #ff66cc);
+  }
+}
+
+#neuro-corner.glitch {
+  animation: neuroGlitch 0.35s ease-in-out 1;
+}
+
+
+.lightbox {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display:flex; justify-content:center; align-items:center;
+}
+.lightbox img {
+  max-width:90%; max-height:90%;
+  box-shadow:0 0 20px #ff66cc;
+}
