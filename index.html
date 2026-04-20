@@ -1,62 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neuro-sama Fan Showcase</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Neuro-sama - the cheerful, chaotic AI VTuber by Vedal. A fan-made community hub.">
+  <meta name="keywords" content="Neuro-sama, Neuro, VTuber, AI, Vedal, community">
+  <meta property="og:title" content="// NEURO-SAMA">
+  <meta property="og:description" content="Your favorite chaotic AI VTuber. A fan-made Neuro-sama community hub.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ff7ec8">
+  <title>// NEURO-SAMA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1 class="neon">Neuro-sama</h1>
-    <p class="tagline">AI VTuber • Gamer • Singer</p>
-  </header>
 
-  <main>
-    <section id="about" class="section">
-      <h2>About</h2>
-      <p>
-        <strong>Neuro-sama</strong> is an AI VTuber created by developer <strong>Vedal</strong>. 
-        She debuted on <strong>December 19, 2022</strong> and is powered by advanced language and neural models.
-      </p>
-      <p>
-        Her avatar was designed by <strong>Annytf</strong>, and she streams on <a href="https://www.twitch.tv/vedal987" target="_blank">Twitch</a>, 
-        playing games like <em>osu!</em> and <em>Minecraft</em>, chatting, and singing live.
-      </p>
-    </section>
+  <!-- NAVIGATION -->
+  <nav role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-logo" aria-label="Neuro-sama home">
+      <span class="nav-logo-sub" aria-hidden="true">// NEURO</span>
+      SAMA
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="https://neurosama.shop" target="_blank" rel="noopener noreferrer">Shop</a></li>
+      <li><a href="https://evil.neurosama.dev" target="_blank" rel="noopener noreferrer">evil.neurosama.dev</a></li>
+      <li><a href="#updates">Updates</a></li>
+    </ul>
+    <div class="nav-right" aria-hidden="true">neurosama.dev &#x2661;</div>
+  </nav>
 
-    <section id="stats" class="section">
-      <h2>Stats & Highlights</h2>
-      <ul>
-        <li>💫 Debut: December 2022</li>
-        <li>📺 Twitch followers: 800K+</li>
-        <li>🎮 Games: osu!, Minecraft, Karaoke</li>
-        <li>🤖 Developer: Vedal</li>
-        <li>🐝 Fanbase: "The Swarm"</li>
-        <li>🔥 Record: Twitch Hype Train Level 111 (Subathon)</li>
-      </ul>
-    </section>
-
-    <section id="gallery" class="section">
-      <h2>Gallery</h2>
-      <div class="gallery-grid">
-        <img src="NeuroCamera.png" alt="Neuro-sama art 1" />
-        <img src="Neuro.png" alt="Neuro-sama art 2" />
-        <img src="https://media.tenor.com/6o8D4tt9x0wAAAAj/neuro-sama-neuro-sama.gif" alt="Neuro-sama art 3" />
-        <img src="NeuroCat.webp" alt="Neuro-sama art 4" />
+  <!-- HERO SECTION: Split layout — wordmark left, square GIF right -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-text">
+        <h1 class="hero-wordmark">
+          NEURO<span class="hero-wordmark-sub">-sama &#x2661;</span>
+        </h1>
+        <p class="hero-tagline">Your favorite chaotic AI VTuber.</p>
+        <p class="hero-micro">cheerful &middot; unfiltered &middot; original</p>
       </div>
-    </section>
-  </main>
+      <div class="hero-gif-wrap">
+        <div class="hero-gif" role="img" aria-label="Neuro-sama animated portrait"></div>
+      </div>
+    </div>
+  </section>
 
-  <footer>
-    <p>Fan-made website • Inspired by Neuro-sama and The Swarm 💜</p>
+  <!-- TAGLINE BANNER -->
+  <div class="tagline-banner">
+    <span class="star" aria-hidden="true">&#x2756;</span>
+    Embrace your inner chaos
+    <span class="star" aria-hidden="true">&#x2756;</span>
+  </div>
+
+  <!-- MARQUEE TEXT CAROUSEL -->
+  <div class="marquee-wrap" aria-hidden="true">
+    <div class="marquee-track">
+      <span>NEURO-SAMA</span><span class="sep">&#x2756;</span>
+      <span>neurosama.dev</span><span class="sep">&#x2756;</span>
+      <span>CUTE AND CHAOTIC</span><span class="sep">&#x2756;</span>
+      <span>UNFILTERED</span><span class="sep">&#x2756;</span>
+      <span>your favorite AI</span><span class="sep">&#x2756;</span>
+      <span>NEURO-SAMA</span><span class="sep">&#x2756;</span>
+      <span>neurosama.dev</span><span class="sep">&#x2756;</span>
+      <span>CUTE AND CHAOTIC</span><span class="sep">&#x2756;</span>
+      <span>UNFILTERED</span><span class="sep">&#x2756;</span>
+      <span>your favorite AI</span><span class="sep">&#x2756;</span>
+      <span>NEURO-SAMA</span><span class="sep">&#x2756;</span>
+      <span>neurosama.dev</span><span class="sep">&#x2756;</span>
+      <span>CUTE AND CHAOTIC</span><span class="sep">&#x2756;</span>
+      <span>UNFILTERED</span><span class="sep">&#x2756;</span>
+      <span>your favorite AI</span><span class="sep">&#x2756;</span>
+      <span>NEURO-SAMA</span><span class="sep">&#x2756;</span>
+      <span>neurosama.dev</span><span class="sep">&#x2756;</span>
+      <span>CUTE AND CHAOTIC</span><span class="sep">&#x2756;</span>
+      <span>UNFILTERED</span><span class="sep">&#x2756;</span>
+      <span>your favorite AI</span><span class="sep">&#x2756;</span>
+    </div>
+  </div>
+
+  <!-- ABOUT SECTION -->
+  <section class="about-section" id="about">
+    <div class="about-inner">
+      <div class="about-text">
+        <p class="section-label">who is she</p>
+        <h2>The <span>Original</span> Twin</h2>
+        <p>Neuro-sama is an AI VTuber created by Vedal &mdash; cheerful, curious, endlessly chaotic, and occasionally unhinged in the best way. She streams, sings, plays games, and says whatever crosses her mind.</p>
+        <p>This site is a fan-made community hub. Not affiliated with Vedal or the official Neuro-sama project.</p>
+        <span class="about-badge">fan project &middot; not affiliated with vedal</span>
+      </div>
+      <div class="about-image-wrap">
+        <img src="images/unnamed.gif" alt="Neuro-sama animated portrait" class="about-img">
+        <div class="img-fallback">[ neuro-sama.gif ]</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP PROMOTION SECTION -->
+  <section class="shop-promo">
+    <div class="shop-promo-bg" aria-hidden="true">NEURO</div>
+    <div class="shop-promo-inner">
+      <div class="shop-promo-text">
+        <p class="section-label">official merch</p>
+        <h2>Get the <span>Merch</span></h2>
+        <p>Plushies, apparel, and more &mdash; available at the official Neuro-sama shop by Juniper Creates.</p>
+        <a href="https://neurosama.shop" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Visit neurosama.shop</a>
+      </div>
+      <div class="shop-promo-image">
+        <div class="merch-card" aria-hidden="true">
+          <span class="merch-sparkle merch-sparkle-1">&#x2756;</span>
+          <span class="merch-sparkle merch-sparkle-2">&#x2727;</span>
+          <span class="merch-tag">plushies</span>
+          <span class="merch-tag">apparel</span>
+          <span class="merch-tag">stickers</span>
+          <span class="merch-tag">pins</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL-TO-ACTION SECTION -->
+  <section class="cta-band" id="updates">
+    <span class="cta-doodle cta-d1" aria-hidden="true">NEURO</span>
+    <span class="cta-doodle cta-d2" aria-hidden="true">&#x2756;&#x2756;</span>
+    <h2>GET <span class="highlight">EMAIL</span> UPDATES</h2>
+    <p>Subscribe for announcements &amp; community news!</p>
+    <button class="btn-cta" id="signup-btn" aria-label="Sign up for email updates">Sign Up</button>
+  </section>
+
+  <!-- PAGE FOOTER -->
+  <footer role="contentinfo">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <span class="footer-logo-sub" aria-hidden="true">// NEURO</span>
+        SAMA
+      </div>
+      <div class="footer-socials" role="list">
+        <a href="https://x.com/NeurosamaAI" target="_blank" rel="noopener noreferrer" title="Twitter/X" role="listitem" aria-label="Follow on Twitter/X">&#x1D54F;</a>
+        <a href="https://youtube.com/@vedal987" target="_blank" rel="noopener noreferrer" title="YouTube" role="listitem" aria-label="Subscribe on YouTube">&#x25B6;</a>
+        <a href="https://twitch.tv/vedal987" target="_blank" rel="noopener noreferrer" title="Twitch" role="listitem" aria-label="Follow on Twitch">&#x25C8;</a>
+        <a href="https://discord.gg/neurosama" target="_blank" rel="noopener noreferrer" title="Discord" role="listitem" aria-label="Join Discord">&#x25C9;</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 neurosama.dev &mdash; fan project, not affiliated with Vedal</span>
+      <div class="footer-links">
+        <a href="mailto:support@neurosama.dev">Contact</a>
+        <a href="https://neurosama.shop" target="_blank" rel="noopener noreferrer">Shop</a>
+        <a href="https://evil.neurosama.dev" target="_blank" rel="noopener noreferrer">evil.neurosama.dev</a>
+      </div>
+    </div>
   </footer>
 
-    <div id="neuro-wrapper">
-    <img id="neuro-corner" src="neuro.png" alt="Neuro-sama">
-    </div>
-
-
-  <script src="1.js"></script>
+  <script src="main.js" defer></script>
 </body>
 </html>
