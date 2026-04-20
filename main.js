@@ -133,3 +133,51 @@ if (document.readyState === 'loading') {
 } else {
   setupImageFallbacks();
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANIMATED FAVICON
+// ═══════════════════════════════════════════════════════════════════════════
+
+const neuroFaviconFrames = [
+  'images/Nuru-4x1.gif',
+  'images/Nuru-4x2.gif',
+  'images/Nuru-4x3.gif',
+  'images/Nuru-4x4.gif',
+  'images/Nuru-4x5.gif'
+];
+
+const FAVICON_FRAME_INTERVAL_MS = 200;
+
+function setupAnimatedFavicon(frames) {
+  if (!Array.isArray(frames) || frames.length === 0 || !document.head) {
+    return;
+  }
+
+  let frameIndex = 0;
+
+  window.setInterval(() => {
+    const framePath = frames[frameIndex];
+    const separator = framePath.includes('?') ? '&' : '?';
+    const frameWithTs = `${framePath}${separator}ts=${Date.now()}`;
+
+    document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(iconLink => {
+      iconLink.remove();
+    });
+
+    const icon = document.createElement('link');
+    icon.setAttribute('rel', 'icon');
+    icon.setAttribute('type', 'image/gif');
+    icon.setAttribute('href', frameWithTs);
+    document.head.appendChild(icon);
+
+    const shortcutIcon = document.createElement('link');
+    shortcutIcon.setAttribute('rel', 'shortcut icon');
+    shortcutIcon.setAttribute('type', 'image/gif');
+    shortcutIcon.setAttribute('href', frameWithTs);
+    document.head.appendChild(shortcutIcon);
+
+    frameIndex = (frameIndex + 1) % frames.length;
+  }, FAVICON_FRAME_INTERVAL_MS);
+}
+
+setupAnimatedFavicon(neuroFaviconFrames);
