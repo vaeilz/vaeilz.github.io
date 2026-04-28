@@ -2,7 +2,7 @@
 
 > Your favorite chaotic AI VTuber fan hub.
 
-![Neuro-sama](images/unnamed.gif)
+<img src="images/unnamed.gif" width="150" alt="Neuro-sama">
 
 **neurosama.dev** is a fan-made community hub for [Neuro-sama](https://en.wikipedia.org/wiki/Neuro-sama) — the cheerful, chaotic AI VTuber created by [Vedal](https://twitch.tv/vedal987).
 
