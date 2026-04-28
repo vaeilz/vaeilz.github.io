@@ -1,29 +1,38 @@
 # neurosama.dev
 
-> Your favorite chaotic AI VTuber fan hub.
+<div align="center">
 
-<img src="images/unnamed.gif" width="150" alt="Neuro-sama">
+<img src="images/unnamed.gif" width="180" alt="Neuro-sama">
 
-**neurosama.dev** is a fan-made community hub for [Neuro-sama](https://en.wikipedia.org/wiki/Neuro-sama) — the cheerful, chaotic AI VTuber created by [Vedal](https://twitch.tv/vedal987).
+### ✧ your favorite chaotic AI VTuber ✧
 
-## About
+*cheerful • unfiltered • original*
 
-Neuro-sama is an AI VTuber who streams, sings, plays games, and says whatever crosses her mind. This site is a fan project created by the community — not affiliated with Vedal.
-
-## Tech
-
-- HTML5 & CSS3
-- Vanilla JavaScript
-- Google Fonts (Fredoka One, Nunito)
-
-## Credits
-
-- **Neuro-sama** — Created by [Vedal](https://twitch.tv/vedal987)
-- **Fan art** — Community contributions
-
-## Disclaimer
-
-This is a fan project. Not affiliated with, endorsed, or supported by Vedal or the official Neuro-sama team.
+</div>
 
 ---
-*Made with 💜 by fans, for fans*
+
+## ≋ About
+
+Neuro-sama is an AI VTuber created by [Vedal](https://twitch.tv/vedal987) — she's cheerful, curious, endlessly chaotic, and occasionally unhinged in the best way. She **streams**, **sings**, **plays games**, and says whatever crosses her mind.
+
+This site is a fan-made community hub — not affiliated with Vedal or the official Neuro-sama project.
+
+---
+
+## ≋ Credits
+
+| | |
+|---|---|
+| **Neuro-sama** | Created by [Vedal](https://twitch.tv/vedal987) |
+| **Fan Art** | Community contributions |
+
+---
+
+<div align="center">
+
+*This is a fan project. Not affiliated with, endorsed, or supported by Vedal.*
+
+ Made with 💜 by fans, for fans
+
+</div>
