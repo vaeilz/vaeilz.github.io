@@ -45,9 +45,11 @@
       inline-size: fit-content;
       min-inline-size: 8.5rem;
       max-inline-size: 100%;
+      box-sizing: border-box;
       min-height: 0 !important;
       padding: 0.7rem 0.8rem !important;
     }
+    .mobile-schedule-title { overflow-wrap: anywhere; }
     @media (min-width: 601px) { .mobile-schedule-wrap { display: none !important; } }
     @media (max-width: 900px) {
       .site-nav { height: auto !important; min-height: 60px; padding: 0.65rem 1rem 0.35rem !important; flex-wrap: wrap; gap: 0.4rem 1rem; }
@@ -345,7 +347,7 @@
         <sc-for list="{{ mobileSchedule }}" as="day" hint-placeholder-count="3">
           <div class="schedule-card" style="border-radius: 16px; padding: 1.1rem 0.9rem 1.3rem; background: {{ day.bg }}; border: 1px solid {{ day.border }}; display: flex; flex-direction: column; gap: 0.5rem; min-height: 150px">
             <span style="font-family: 'Fredoka One', cursive; font-size: 0.85rem; letter-spacing: 0.1em; color: {{ day.accent }}">{{ day.name }}</span>
-            <span style="font-weight: 900; font-size: 0.95rem; line-height: 1.3">{{ day.what }}</span>
+            <span class="mobile-schedule-title" style="font-weight: 900; font-size: 0.95rem; line-height: 1.3">{{ day.what }}</span>
             <span style="font-size: 0.74rem; color: rgba(255,255,255,0.45); margin-top: auto">{{ day.time }}</span>
           </div>
         </sc-for>
@@ -431,6 +433,7 @@ class Component extends DCLogic {
   heroImgRef = React.createRef();
   avatarRef = React.createRef();
   quoteSwipeStart = null;
+  quoteSwipeMoved = false;
   artSwipeStart = null;
 
   moveQuote = (delta) => this.setState((state) => ({
@@ -443,6 +446,7 @@ class Component extends DCLogic {
 
   onQuotePointerDown = (event) => {
     this.quoteSwipeStart = event.clientX;
+    this.quoteSwipeMoved = false;
   };
 
   onQuotePointerUp = (event) => {
@@ -450,11 +454,13 @@ class Component extends DCLogic {
     const movement = event.clientX - this.quoteSwipeStart;
     this.quoteSwipeStart = null;
     if (Math.abs(movement) < 40) return;
+    this.quoteSwipeMoved = true;
     this.moveQuote(movement < 0 ? 1 : -1);
   };
 
   onQuotePointerCancel = () => {
     this.quoteSwipeStart = null;
+    this.quoteSwipeMoved = false;
   };
 
   onArtPointerDown = (event) => {
@@ -784,7 +790,15 @@ class Component extends DCLogic {
       chatCropHeight: 'calc(100% + ' + (this.props.chatCropPx ?? 145) + 'px)',
       quoteClips: this.state.quotes.map((q) => ({
         ...q,
-        onPlay: () => this.setState({ activeVideo: q })
+        onPlay: (event) => {
+          if (this.quoteSwipeMoved) {
+            this.quoteSwipeMoved = false;
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          this.setState({ activeVideo: q });
+        }
       })),
       quoteIndex: this.state.quoteIndex,
       quoteTrackStyle: '--carousel-index: ' + this.state.quoteIndex,

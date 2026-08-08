@@ -2,9 +2,39 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const randomizer = require('../random-selection.js');
+const interactions = require('../mobile-interactions.js');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+function createComponent() {
+  const script = html.match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/);
+  assert.ok(script, 'component script should exist');
+
+  const sandbox = {
+    MobileInteractions: interactions,
+    React: { createRef: () => ({ current: null }) },
+    location: { hostname: 'localhost', ancestorOrigins: [] },
+    URL,
+    encodeURIComponent,
+    console
+  };
+  sandbox.globalThis = sandbox;
+  vm.runInNewContext(`
+    class DCLogic {
+      constructor() { this.props = {}; }
+      setState(update) {
+        const next = typeof update === 'function' ? update(this.state) : update;
+        this.state = { ...this.state, ...next };
+      }
+    }
+    ${script[1]}
+    globalThis.component = new Component();
+  `, sandbox);
+
+  return sandbox.component;
+}
 
 test('dedupeByUrl removes invalid and duplicate image URLs', () => {
   const result = randomizer.dedupeByUrl([
@@ -117,6 +147,38 @@ test('mobile schedule exposes compact expandable content', () => {
   assert.match(html, /aria-expanded="\{\{ scheduleExpanded \}\}"/);
   assert.match(html, /View full week/);
   assert.match(html, /inline-size:\s*fit-content/);
+});
+
+test('quote swipe suppresses the ensuing video activation while taps still play', () => {
+  const component = createComponent();
+  const quote = { text: 'Test quote', url: 'https://example.com/video' };
+  component.state.quotes = [quote];
+  const onPlay = component.renderVals().quoteClips[0].onPlay;
+  let prevented = false;
+  let stopped = false;
+
+  component.onQuotePointerDown({ clientX: 100 });
+  component.onQuotePointerUp({ clientX: 50 });
+  onPlay({
+    preventDefault() { prevented = true; },
+    stopPropagation() { stopped = true; }
+  });
+
+  assert.equal(component.state.activeVideo, null);
+  assert.equal(prevented, true);
+  assert.equal(stopped, true);
+
+  component.onQuotePointerDown({ clientX: 100 });
+  component.onQuotePointerUp({ clientX: 80 });
+  onPlay({ preventDefault() {}, stopPropagation() {} });
+
+  assert.equal(component.state.activeVideo, quote);
+});
+
+test('mobile schedule cards contain long unbroken titles', () => {
+  assert.match(html, /\.mobile-schedule-grid \.schedule-card\s*\{[^}]*box-sizing:\s*border-box/s);
+  assert.match(html, /\.mobile-schedule-title\s*\{\s*overflow-wrap:\s*anywhere/s);
+  assert.match(html, /class="mobile-schedule-title"/);
 });
 
 test('mobile about section clips transformed artwork without widening the page', () => {
