@@ -434,6 +434,7 @@ class Component extends DCLogic {
   avatarRef = React.createRef();
   quoteSwipeStart = null;
   quoteSwipeMoved = false;
+  quoteSwipeResetTimer = null;
   artSwipeStart = null;
 
   moveQuote = (delta) => this.setState((state) => ({
@@ -444,9 +445,15 @@ class Component extends DCLogic {
     artIndex: MobileInteractions.moveIndex(state.artIndex, delta, state.artItems.length)
   }));
 
+  clearQuoteSwipeSuppression = () => {
+    if (this.quoteSwipeResetTimer !== null) clearTimeout(this.quoteSwipeResetTimer);
+    this.quoteSwipeResetTimer = null;
+    this.quoteSwipeMoved = false;
+  };
+
   onQuotePointerDown = (event) => {
     this.quoteSwipeStart = event.clientX;
-    this.quoteSwipeMoved = false;
+    this.clearQuoteSwipeSuppression();
   };
 
   onQuotePointerUp = (event) => {
@@ -455,12 +462,13 @@ class Component extends DCLogic {
     this.quoteSwipeStart = null;
     if (Math.abs(movement) < 40) return;
     this.quoteSwipeMoved = true;
+    this.quoteSwipeResetTimer = setTimeout(this.clearQuoteSwipeSuppression, 0);
     this.moveQuote(movement < 0 ? 1 : -1);
   };
 
   onQuotePointerCancel = () => {
     this.quoteSwipeStart = null;
-    this.quoteSwipeMoved = false;
+    this.clearQuoteSwipeSuppression();
   };
 
   onArtPointerDown = (event) => {
@@ -581,6 +589,7 @@ class Component extends DCLogic {
   componentWillUnmount() {
     if (this.chatTimer) clearInterval(this.chatTimer);
     if (this.liveTimer) clearInterval(this.liveTimer);
+    this.clearQuoteSwipeSuppression();
     window.removeEventListener('scroll', this.onScroll);
   }
 
@@ -791,8 +800,9 @@ class Component extends DCLogic {
       quoteClips: this.state.quotes.map((q) => ({
         ...q,
         onPlay: (event) => {
-          if (this.quoteSwipeMoved) {
-            this.quoteSwipeMoved = false;
+          const suppressSwipeClick = this.quoteSwipeMoved && event.detail > 0;
+          this.clearQuoteSwipeSuppression();
+          if (suppressSwipeClick) {
             event.preventDefault();
             event.stopPropagation();
             return;

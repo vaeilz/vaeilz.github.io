@@ -18,7 +18,9 @@ function createComponent() {
     location: { hostname: 'localhost', ancestorOrigins: [] },
     URL,
     encodeURIComponent,
-    console
+    console,
+    setTimeout,
+    clearTimeout
   };
   sandbox.globalThis = sandbox;
   vm.runInNewContext(`
@@ -160,6 +162,7 @@ test('quote swipe suppresses the ensuing video activation while taps still play'
   component.onQuotePointerDown({ clientX: 100 });
   component.onQuotePointerUp({ clientX: 50 });
   onPlay({
+    detail: 1,
     preventDefault() { prevented = true; },
     stopPropagation() { stopped = true; }
   });
@@ -170,7 +173,23 @@ test('quote swipe suppresses the ensuing video activation while taps still play'
 
   component.onQuotePointerDown({ clientX: 100 });
   component.onQuotePointerUp({ clientX: 80 });
-  onPlay({ preventDefault() {}, stopPropagation() {} });
+  onPlay({ detail: 1, preventDefault() {}, stopPropagation() {} });
+
+  assert.equal(component.state.activeVideo, quote);
+});
+
+test('quote swipe suppression expires when no pointer click follows', async () => {
+  const component = createComponent();
+  const quote = { text: 'Keyboard quote', url: 'https://example.com/keyboard-video' };
+  component.state.quotes = [quote];
+  const onPlay = component.renderVals().quoteClips[0].onPlay;
+
+  component.onQuotePointerDown({ clientX: 100 });
+  component.onQuotePointerUp({ clientX: 50 });
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  assert.equal(component.quoteSwipeMoved, false);
+  onPlay({ detail: 0, preventDefault() {}, stopPropagation() {} });
 
   assert.equal(component.state.activeVideo, quote);
 });
