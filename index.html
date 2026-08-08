@@ -262,7 +262,7 @@
     <div class="carousel-viewport mobile-quote-viewport" onPointerDown="{{ onQuotePointerDown }}" onPointerUp="{{ onQuotePointerUp }}" onPointerCancel="{{ onQuotePointerCancel }}">
     <div class="mobile-quote-track" style="--carousel-index: {{ quoteIndex }}; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem">
       <sc-for list="{{ quoteClips }}" as="q" hint-placeholder-count="8">
-        <button class="quote-card" onClick="{{ q.onPlay }}" data-reveal style="all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s, box-shadow 0.3s; color: #ffffff" style-hover="transform: translateY(-8px) rotate(-0.5deg); border-color: rgba(255,126,200,0.5); box-shadow: 0 18px 50px rgba(255,126,200,0.25)">
+        <button class="quote-card" tabIndex="{{ q.tabIndex }}" onClick="{{ q.onPlay }}" data-reveal style="all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s, box-shadow 0.3s; color: #ffffff" style-hover="transform: translateY(-8px) rotate(-0.5deg); border-color: rgba(255,126,200,0.5); box-shadow: 0 18px 50px rgba(255,126,200,0.25)">
           <div style="aspect-ratio: 16 / 9; overflow: hidden; background: rgba(255,126,200,0.06); position: relative; width: 100%">
             <img src="{{ q.thumb }}" alt="Clip thumbnail" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block">
             <span style="position: absolute; top: 8px; left: 8px; background: {{ q.badgeBg }}; color: #0a0a0f; font-family: 'Fredoka One', cursive; font-size: 0.64rem; letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: 999px">{{ q.who }}</span>
@@ -352,7 +352,7 @@
           </div>
         </sc-for>
       </div>
-      <button type="button" aria-expanded="{{ scheduleExpanded }}" onClick="{{ onToggleSchedule }}" style="min-height: 44px; margin-top: 0.85rem; border: 1px solid rgba(126,227,255,0.35); border-radius: 999px; background: rgba(126,227,255,0.08); color: #7ee3ff; padding: 0.55rem 1rem; font: inherit; font-weight: 900; cursor: pointer">{{ scheduleToggleLabel }}</button>
+      <button type="button" aria-expanded="{{ scheduleExpanded }}" onKeyDown="{{ onScheduleToggleKeyDown }}" onClick="{{ onToggleSchedule }}" style="min-height: 44px; margin-top: 0.85rem; border: 1px solid rgba(126,227,255,0.35); border-radius: 999px; background: rgba(126,227,255,0.08); color: #7ee3ff; padding: 0.55rem 1rem; font: inherit; font-weight: 900; cursor: pointer">{{ scheduleToggleLabel }}</button>
     </div>
     <p data-reveal style="font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 1.4rem 0 0; font-style: italic">{{ scheduleNote }} &mdash; follow <a href="https://twitch.tv/vedal987" target="_blank" rel="noopener noreferrer" style="color: #7ee3ff">twitch.tv/vedal987</a> for updates</p>
   </div>
@@ -417,6 +417,7 @@ class Component extends DCLogic {
     artItems: [],
     artIndex: 0,
     artFailed: false,
+    isMobileCarousel: false,
     chatMessages: [],
     viewers: 24812,
     activeVideo: null,
@@ -436,6 +437,7 @@ class Component extends DCLogic {
   quoteSwipeMoved = false;
   quoteSwipeResetTimer = null;
   artSwipeStart = null;
+  carouselMediaQuery = null;
 
   moveQuote = (delta) => this.setState((state) => ({
     quoteIndex: MobileInteractions.moveIndex(state.quoteIndex, delta, state.quotes.length)
@@ -451,6 +453,20 @@ class Component extends DCLogic {
     activate();
   };
 
+  isMobileCarouselViewport = () => (
+    typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(max-width: 600px)').matches
+  );
+
+  onCarouselMediaChange = (event) => {
+    this.setState({ isMobileCarousel: event.matches });
+  };
+
+  toggleSchedule = () => {
+    this.setState((state) => ({ showFullSchedule: !state.showFullSchedule }));
+  };
+
   clearQuoteSwipeSuppression = () => {
     if (this.quoteSwipeResetTimer !== null) clearTimeout(this.quoteSwipeResetTimer);
     this.quoteSwipeResetTimer = null;
@@ -458,11 +474,21 @@ class Component extends DCLogic {
   };
 
   onQuotePointerDown = (event) => {
+    if (!this.isMobileCarouselViewport()) {
+      this.quoteSwipeStart = null;
+      this.clearQuoteSwipeSuppression();
+      return;
+    }
     this.quoteSwipeStart = event.clientX;
     this.clearQuoteSwipeSuppression();
   };
 
   onQuotePointerUp = (event) => {
+    if (!this.isMobileCarouselViewport()) {
+      this.quoteSwipeStart = null;
+      this.clearQuoteSwipeSuppression();
+      return;
+    }
     if (this.quoteSwipeStart === null) return;
     const movement = event.clientX - this.quoteSwipeStart;
     this.quoteSwipeStart = null;
@@ -478,10 +504,18 @@ class Component extends DCLogic {
   };
 
   onArtPointerDown = (event) => {
+    if (!this.isMobileCarouselViewport()) {
+      this.artSwipeStart = null;
+      return;
+    }
     this.artSwipeStart = event.clientX;
   };
 
   onArtPointerUp = (event) => {
+    if (!this.isMobileCarouselViewport()) {
+      this.artSwipeStart = null;
+      return;
+    }
     if (this.artSwipeStart === null) return;
     const movement = event.clientX - this.artSwipeStart;
     this.artSwipeStart = null;
@@ -510,6 +544,13 @@ class Component extends DCLogic {
 
   componentDidMount() {
     // scroll reveals are pure CSS (animation-timeline: view()) — no JS needed
+
+    if (typeof window.matchMedia === 'function') {
+      this.carouselMediaQuery = window.matchMedia('(max-width: 600px)');
+      this.setState({ isMobileCarousel: this.carouselMediaQuery.matches });
+      if (this.carouselMediaQuery.addEventListener) this.carouselMediaQuery.addEventListener('change', this.onCarouselMediaChange);
+      else if (this.carouselMediaQuery.addListener) this.carouselMediaQuery.addListener(this.onCarouselMediaChange);
+    }
 
     const heroGifIndex = Math.floor(Math.random() * this.gifs.length);
     if (this.heroImgRef.current) this.heroImgRef.current.src = this.gifs[heroGifIndex];
@@ -596,6 +637,10 @@ class Component extends DCLogic {
     if (this.chatTimer) clearInterval(this.chatTimer);
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.clearQuoteSwipeSuppression();
+    if (this.carouselMediaQuery) {
+      if (this.carouselMediaQuery.removeEventListener) this.carouselMediaQuery.removeEventListener('change', this.onCarouselMediaChange);
+      else if (this.carouselMediaQuery.removeListener) this.carouselMediaQuery.removeListener(this.onCarouselMediaChange);
+    }
     window.removeEventListener('scroll', this.onScroll);
   }
 
@@ -803,8 +848,9 @@ class Component extends DCLogic {
       embedButtonLabel: this.state.showEmbed ? 'Hide player' : '\u25B6 Watch here',
       chatCropOffset: '-' + (this.props.chatCropPx ?? 145) + 'px',
       chatCropHeight: 'calc(100% + ' + (this.props.chatCropPx ?? 145) + 'px)',
-      quoteClips: this.state.quotes.map((q) => ({
+      quoteClips: this.state.quotes.map((q, index) => ({
         ...q,
+        tabIndex: !this.state.isMobileCarousel || index === this.state.quoteIndex ? 0 : -1,
         onPlay: (event) => {
           const suppressSwipeClick = this.quoteSwipeMoved && event.detail > 0;
           this.clearQuoteSwipeSuppression();
@@ -817,7 +863,6 @@ class Component extends DCLogic {
         }
       })),
       quoteIndex: this.state.quoteIndex,
-      quoteTrackStyle: '--carousel-index: ' + this.state.quoteIndex,
       onQuotePointerDown: this.onQuotePointerDown,
       onQuotePointerUp: this.onQuotePointerUp,
       onQuotePointerCancel: this.onQuotePointerCancel,
@@ -850,7 +895,6 @@ class Component extends DCLogic {
         })
       })),
       artIndex: this.state.artIndex,
-      artTrackStyle: '--carousel-index: ' + this.state.artIndex,
       onArtPointerDown: this.onArtPointerDown,
       onArtPointerUp: this.onArtPointerUp,
       onArtPointerCancel: this.onArtPointerCancel,
@@ -866,7 +910,8 @@ class Component extends DCLogic {
       mobileSchedule,
       scheduleExpanded: this.state.showFullSchedule,
       scheduleToggleLabel: this.state.showFullSchedule ? 'Show less' : 'View full week',
-      onToggleSchedule: () => this.setState((state) => ({ showFullSchedule: !state.showFullSchedule })),
+      onToggleSchedule: this.toggleSchedule,
+      onScheduleToggleKeyDown: (event) => this.onCarouselKeyDown(event, this.toggleSchedule),
       onGifClick: () => {
         const nextIndex = ImageRandomizer.pickDifferentIndex(this.gifs.length, this.state.heroGifIndex);
         if (this.heroImgRef.current) this.heroImgRef.current.src = this.gifs[nextIndex];

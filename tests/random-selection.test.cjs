@@ -8,10 +8,17 @@ const interactions = require('../mobile-interactions.js');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
-function createComponent() {
+function createComponent({ mobileMatches = true } = {}) {
   const script = html.match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/);
   assert.ok(script, 'component script should exist');
 
+  const mediaQuery = {
+    matches: mobileMatches,
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {}
+  };
   const sandbox = {
     MobileInteractions: interactions,
     React: { createRef: () => ({ current: null }) },
@@ -20,7 +27,8 @@ function createComponent() {
     encodeURIComponent,
     console,
     setTimeout,
-    clearTimeout
+    clearTimeout,
+    window: { matchMedia: () => mediaQuery }
   };
   sandbox.globalThis = sandbox;
   vm.runInNewContext(`
@@ -166,6 +174,71 @@ test('mobile schedule exposes compact expandable content', () => {
   assert.match(html, /aria-expanded="\{\{ scheduleExpanded \}\}"/);
   assert.match(html, /View full week/);
   assert.match(html, /inline-size:\s*fit-content/);
+  assert.match(html, /aria-expanded="\{\{ scheduleExpanded \}\}"[^>]*onKeyDown="\{\{ onScheduleToggleKeyDown \}\}"/);
+});
+
+test('schedule keyboard activation toggles exactly once for Enter and Space', () => {
+  const component = createComponent();
+  let prevented = 0;
+  const event = (key) => ({ key, preventDefault() { prevented += 1; } });
+
+  let values = component.renderVals();
+  assert.equal(typeof values.onScheduleToggleKeyDown, 'function');
+  assert.equal(values.mobileSchedule.length, 3);
+
+  values.onScheduleToggleKeyDown(event('Enter'));
+  values = component.renderVals();
+  assert.equal(values.mobileSchedule.length, 7);
+
+  values.onScheduleToggleKeyDown(event(' '));
+  values = component.renderVals();
+  assert.equal(values.mobileSchedule.length, 3);
+
+  values.onScheduleToggleKeyDown(event('ArrowDown'));
+  assert.equal(component.state.showFullSchedule, false);
+  assert.equal(prevented, 2);
+});
+
+test('quote cards use mobile roving focus and remain fully tabbable on desktop', () => {
+  const component = createComponent();
+  component.state.quotes = [{ text: 'one' }, { text: 'two' }, { text: 'three' }];
+  component.state.isMobileCarousel = true;
+  const mobileValues = component.renderVals();
+  mobileValues.onNextQuote();
+
+  assert.equal(component.state.quoteIndex, 1);
+  assert.deepEqual(
+    Array.from(component.renderVals().quoteClips, (quote) => quote.tabIndex),
+    [-1, 0, -1]
+  );
+
+  component.state.isMobileCarousel = false;
+  assert.deepEqual(
+    Array.from(component.renderVals().quoteClips, (quote) => quote.tabIndex),
+    [0, 0, 0]
+  );
+  assert.match(html, /class="quote-card"[^>]*tabIndex="\{\{ q\.tabIndex \}\}"/);
+});
+
+test('desktop pointer gestures do not move carousels or suppress quote playback', () => {
+  const component = createComponent({ mobileMatches: false });
+  const firstQuote = { text: 'one', url: 'https://example.com/one' };
+  component.state.quotes = [firstQuote, { text: 'two' }];
+  component.state.artItems = [{ img: 'one' }, { img: 'two' }];
+  const onPlay = component.renderVals().quoteClips[0].onPlay;
+
+  component.onQuotePointerDown({ clientX: 100 });
+  component.onQuotePointerUp({ clientX: 40 });
+  component.onArtPointerDown({ clientX: 100 });
+  component.onArtPointerUp({ clientX: 40 });
+
+  assert.equal(component.state.quoteIndex, 0);
+  assert.equal(component.state.artIndex, 0);
+  assert.equal(component.quoteSwipeMoved, false);
+  assert.equal(component.quoteSwipeStart, null);
+  assert.equal(component.artSwipeStart, null);
+  onPlay({ detail: 1, preventDefault() {}, stopPropagation() {} });
+  assert.equal(component.state.activeVideo, firstQuote);
 });
 
 test('quote swipe suppresses the ensuing video activation while taps still play', () => {
