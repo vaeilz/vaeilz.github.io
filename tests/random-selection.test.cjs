@@ -99,9 +99,24 @@ test('page defines tablet and phone responsive breakpoints', () => {
   assert.match(html, /@media \(max-width: 600px\)/);
 });
 
-test('mobile content tracks use mandatory horizontal snapping', () => {
-  assert.match(html, /scroll-snap-type:\s*x mandatory/);
-  assert.match(html, /-webkit-overflow-scrolling:\s*touch/);
+test('mobile media uses clipped animated tracks and manual controls', () => {
+  assert.match(html, /class="carousel-viewport mobile-quote-viewport"/);
+  assert.match(html, /class="carousel-controls"/);
+  assert.match(html, /transform:\s*translate3d\(calc\(var\(--carousel-index\)/);
+  assert.doesNotMatch(html, /scroll-snap-type:\s*x mandatory/);
+});
+
+test('mobile carousels expose swipe and accessible arrow controls', () => {
+  assert.match(html, /onPointerDown="\{\{ onQuotePointerDown \}\}"/);
+  assert.match(html, /aria-label="Previous quote clip"/);
+  assert.match(html, /aria-label="Next fan art"/);
+});
+
+test('mobile schedule exposes compact expandable content', () => {
+  assert.match(html, /class="mobile-schedule-grid"/);
+  assert.match(html, /aria-expanded="\{\{ scheduleExpanded \}\}"/);
+  assert.match(html, /View full week/);
+  assert.match(html, /inline-size:\s*fit-content/);
 });
 
 test('mobile about section clips transformed artwork without widening the page', () => {

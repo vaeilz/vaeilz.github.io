@@ -37,6 +37,18 @@
     @supports (animation-timeline: view()) {
       [data-reveal] { animation: reveal-in 0.7s cubic-bezier(0.22,1,0.36,1) both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
     }
+    .carousel-controls { display: none; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem; }
+    .carousel-controls button { min-width: 44px; min-height: 44px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: inherit; cursor: pointer; font: inherit; font-weight: 900; }
+    .carousel-controls button:disabled { cursor: default; opacity: 0.35; }
+    .mobile-schedule-grid { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.65rem; }
+    .mobile-schedule-grid .schedule-card {
+      inline-size: fit-content;
+      min-inline-size: 8.5rem;
+      max-inline-size: 100%;
+      min-height: 0 !important;
+      padding: 0.7rem 0.8rem !important;
+    }
+    @media (min-width: 601px) { .mobile-schedule-wrap { display: none !important; } }
     @media (max-width: 900px) {
       .site-nav { height: auto !important; min-height: 60px; padding: 0.65rem 1rem 0.35rem !important; flex-wrap: wrap; gap: 0.4rem 1rem; }
       .site-brand { order: 1; }
@@ -71,30 +83,26 @@
       .stream-footer { align-items: stretch !important; flex-direction: column; gap: 0.85rem; }
       .stream-actions { flex-wrap: wrap; }
       .stream-actions > * { flex: 1 1 140px; text-align: center; }
+      .carousel-viewport { overflow: hidden; touch-action: pan-y; }
+      .carousel-controls { display: flex; }
       .mobile-quote-track, .mobile-art-track {
         display: flex !important;
         gap: 1rem !important;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-snap-type: x mandatory;
-        overscroll-behavior-inline: contain;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        padding: 0 0 0.75rem !important;
+        transform: translate3d(calc(var(--carousel-index) * (-100% - 1rem)), 0, 0);
+        transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
+        padding: 0 !important;
         columns: auto !important;
       }
       .quote-card, .art-card {
-        flex: 0 0 calc(100vw - 3rem) !important;
-        width: calc(100vw - 3rem) !important;
-        max-width: 430px;
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        max-width: none;
         margin: 0 !important;
       }
       .art-card img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
       .video-lightbox { padding: 3rem 1rem !important; }
-      .schedule-grid { grid-template-columns: 1fr !important; }
-      .schedule-card { min-height: 118px !important; }
+      .desktop-schedule-grid { display: none !important; }
       .about-layout { align-items: stretch !important; }
       .about-art { width: min(82vw, 300px); }
       .about-badge { border-radius: 18px !important; white-space: normal; }
@@ -102,7 +110,10 @@
       .footer-top, .footer-bottom { flex-direction: column; }
       .footer-bottom-links { flex-wrap: wrap; gap: 0.8rem 1.2rem !important; }
     }
-    @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .mobile-quote-track, .mobile-art-track { transition-duration: 0.01ms !important; }
+    }
   </style>
 </helmet>
 <!-- erm -->
@@ -246,7 +257,8 @@
     <sc-if value="{{ quotesFailed }}" hint-placeholder-val="{{ false }}">
       <p style="color: rgba(255,255,255,0.45); font-size: 0.9rem; border: 1px dashed rgba(255,255,255,0.2); border-radius: 14px; padding: 1.5rem; text-align: center">Couldn't reach the karaoke API right now &mdash; check out <a href="https://neurokaraoke.com" target="_blank" rel="noopener noreferrer" style="color: #7ee3ff">neurokaraoke.com</a> directly.</p>
     </sc-if>
-    <div class="mobile-quote-track" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem">
+    <div class="carousel-viewport mobile-quote-viewport" onPointerDown="{{ onQuotePointerDown }}" onPointerUp="{{ onQuotePointerUp }}" onPointerCancel="{{ onQuotePointerCancel }}">
+    <div class="mobile-quote-track" style="--carousel-index: {{ quoteIndex }}; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem">
       <sc-for list="{{ quoteClips }}" as="q" hint-placeholder-count="8">
         <button class="quote-card" onClick="{{ q.onPlay }}" data-reveal style="all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s, box-shadow 0.3s; color: #ffffff" style-hover="transform: translateY(-8px) rotate(-0.5deg); border-color: rgba(255,126,200,0.5); box-shadow: 0 18px 50px rgba(255,126,200,0.25)">
           <div style="aspect-ratio: 16 / 9; overflow: hidden; background: rgba(255,126,200,0.06); position: relative; width: 100%">
@@ -260,6 +272,11 @@
           </div>
         </button>
       </sc-for>
+    </div>
+    </div>
+    <div class="carousel-controls">
+      <button type="button" aria-label="Previous quote clip" onClick="{{ onPreviousQuote }}" disabled="{{ quotePreviousDisabled }}" style="color: #7ee3ff">&larr;</button>
+      <button type="button" aria-label="Next quote clip" onClick="{{ onNextQuote }}" disabled="{{ quoteNextDisabled }}" style="color: #7ee3ff">&rarr;</button>
     </div>
   </div>
 </section>
@@ -291,13 +308,19 @@
     <sc-if value="{{ artFailed }}" hint-placeholder-val="{{ false }}">
       <p style="color: rgba(255,255,255,0.45); font-size: 0.9rem; border: 1px dashed rgba(255,255,255,0.2); border-radius: 14px; padding: 1.5rem; text-align: center">Couldn't load fan art right now &mdash; browse the <a href="https://neurokaraoke.com/art-gallery" target="_blank" rel="noopener noreferrer" style="color: #7ee3ff">full gallery</a> instead.</p>
     </sc-if>
-    <div class="mobile-art-track" style="columns: 4 240px; column-gap: 1.1rem">
+    <div class="carousel-viewport mobile-art-viewport" onPointerDown="{{ onArtPointerDown }}" onPointerUp="{{ onArtPointerUp }}" onPointerCancel="{{ onArtPointerCancel }}">
+    <div class="mobile-art-track" style="--carousel-index: {{ artIndex }}; columns: 4 240px; column-gap: 1.1rem">
       <sc-for list="{{ artItems }}" as="art" hint-placeholder-count="12">
         <figure class="art-card" data-reveal style="margin: 0 0 1.1rem; border-radius: 14px; overflow: hidden; position: relative; break-inside: avoid; border: 1px solid rgba(255,255,255,0.08); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s" style-hover="transform: scale(1.025) rotate(0.4deg); box-shadow: 0 14px 44px rgba(126,227,255,0.22)">
           <img src="{{ art.img }}" alt="{{ art.alt }}" loading="lazy" onError="{{ art.onError }}" style="width: 100%; display: block">
           <figcaption style="position: absolute; inset: auto 0 0 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: 1.6rem 0.9rem 0.7rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 700">{{ art.credit }}</figcaption>
         </figure>
       </sc-for>
+    </div>
+    </div>
+    <div class="carousel-controls">
+      <button type="button" aria-label="Previous fan art" onClick="{{ onPreviousArt }}" disabled="{{ artPreviousDisabled }}" style="color: #7ee3ff">&larr;</button>
+      <button type="button" aria-label="Next fan art" onClick="{{ onNextArt }}" disabled="{{ artNextDisabled }}" style="color: #7ee3ff">&rarr;</button>
     </div>
     <p data-reveal style="font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 1.5rem 0 0; text-align: center; font-style: italic">artwork loaded live from neurokaraoke.com &mdash; all credit to the original artists</p>
   </div>
@@ -308,7 +331,7 @@
   <div style="max-width: 1150px; margin: 0 auto; position: relative; z-index: 2">
     <p data-reveal style="font-family: 'Fredoka One', cursive; font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; color: #7ee3ff; margin: 0 0 0.5rem">when to tune in</p>
     <h2 data-reveal style="font-family: 'Fredoka One', cursive; font-size: clamp(2rem, 4.5vw, 3.2rem); margin: 0 0 2.5rem; line-height: 1.05">Weekly <span style="color: #ff7ec8">schedule</span></h2>
-    <div class="schedule-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.9rem">
+    <div class="schedule-grid desktop-schedule-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.9rem">
       <sc-for list="{{ schedule }}" as="day" hint-placeholder-count="7">
         <div class="schedule-card" data-reveal style="border-radius: 16px; padding: 1.1rem 0.9rem 1.3rem; background: {{ day.bg }}; border: 1px solid {{ day.border }}; display: flex; flex-direction: column; gap: 0.5rem; min-height: 150px; transition: transform 0.25s" style-hover="transform: translateY(-5px)">
           <span style="font-family: 'Fredoka One', cursive; font-size: 0.85rem; letter-spacing: 0.1em; color: {{ day.accent }}">{{ day.name }}</span>
@@ -316,6 +339,18 @@
           <span style="font-size: 0.74rem; color: rgba(255,255,255,0.45); margin-top: auto">{{ day.time }}</span>
         </div>
       </sc-for>
+    </div>
+    <div class="mobile-schedule-wrap">
+      <div class="mobile-schedule-grid">
+        <sc-for list="{{ mobileSchedule }}" as="day" hint-placeholder-count="3">
+          <div class="schedule-card" style="border-radius: 16px; padding: 1.1rem 0.9rem 1.3rem; background: {{ day.bg }}; border: 1px solid {{ day.border }}; display: flex; flex-direction: column; gap: 0.5rem; min-height: 150px">
+            <span style="font-family: 'Fredoka One', cursive; font-size: 0.85rem; letter-spacing: 0.1em; color: {{ day.accent }}">{{ day.name }}</span>
+            <span style="font-weight: 900; font-size: 0.95rem; line-height: 1.3">{{ day.what }}</span>
+            <span style="font-size: 0.74rem; color: rgba(255,255,255,0.45); margin-top: auto">{{ day.time }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <button type="button" aria-expanded="{{ scheduleExpanded }}" onClick="{{ onToggleSchedule }}" style="min-height: 44px; margin-top: 0.85rem; border: 1px solid rgba(126,227,255,0.35); border-radius: 999px; background: rgba(126,227,255,0.08); color: #7ee3ff; padding: 0.55rem 1rem; font: inherit; font-weight: 900; cursor: pointer">{{ scheduleToggleLabel }}</button>
     </div>
     <p data-reveal style="font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 1.4rem 0 0; font-style: italic">{{ scheduleNote }} &mdash; follow <a href="https://twitch.tv/vedal987" target="_blank" rel="noopener noreferrer" style="color: #7ee3ff">twitch.tv/vedal987</a> for updates</p>
   </div>
@@ -375,8 +410,10 @@ class Component extends DCLogic {
     heroGifIndex: 0,
     clickCount: 0,
     quotes: [],
+    quoteIndex: 0,
     quotesFailed: false,
     artItems: [],
+    artIndex: 0,
     artFailed: false,
     chatMessages: [],
     viewers: 24812,
@@ -385,13 +422,56 @@ class Component extends DCLogic {
     showEmbed: false,
     liveDetected: false,
     streamTitle: '',
-    realViewers: null
+    realViewers: null,
+    showFullSchedule: false
   };
 
   gifs = ['images/unnamed.gif', 'images/Nuru-4x1.gif', 'images/Nuru-4x2.gif', 'images/Nuru-4x3.gif', 'images/Nuru-4x4.gif', 'images/Nuru-4x5.gif'];
 
   heroImgRef = React.createRef();
   avatarRef = React.createRef();
+  quoteSwipeStart = null;
+  artSwipeStart = null;
+
+  moveQuote = (delta) => this.setState((state) => ({
+    quoteIndex: MobileInteractions.moveIndex(state.quoteIndex, delta, state.quotes.length)
+  }));
+
+  moveArt = (delta) => this.setState((state) => ({
+    artIndex: MobileInteractions.moveIndex(state.artIndex, delta, state.artItems.length)
+  }));
+
+  onQuotePointerDown = (event) => {
+    this.quoteSwipeStart = event.clientX;
+  };
+
+  onQuotePointerUp = (event) => {
+    if (this.quoteSwipeStart === null) return;
+    const movement = event.clientX - this.quoteSwipeStart;
+    this.quoteSwipeStart = null;
+    if (Math.abs(movement) < 40) return;
+    this.moveQuote(movement < 0 ? 1 : -1);
+  };
+
+  onQuotePointerCancel = () => {
+    this.quoteSwipeStart = null;
+  };
+
+  onArtPointerDown = (event) => {
+    this.artSwipeStart = event.clientX;
+  };
+
+  onArtPointerUp = (event) => {
+    if (this.artSwipeStart === null) return;
+    const movement = event.clientX - this.artSwipeStart;
+    this.artSwipeStart = null;
+    if (Math.abs(movement) < 40) return;
+    this.moveArt(movement < 0 ? 1 : -1);
+  };
+
+  onArtPointerCancel = () => {
+    this.artSwipeStart = null;
+  };
 
   chatPool = [
     { user: 'swarm_member_01', color: '#7ee3ff', text: 'heart heart heart' },
@@ -541,7 +621,7 @@ class Component extends DCLogic {
           thumb: q.video.thumbnailUrl || ('https://vz-26de8a11-dde.b-cdn.net/' + q.video.absolutePath + '/thumbnail.jpg')
         }));
       this.allQuotes = quotes;
-      this.setState({ quotes: this.shuffle(quotes).slice(0, 8), quotesFailed: quotes.length === 0 });
+      this.setState({ quotes: this.shuffle(quotes).slice(0, 8), quoteIndex: 0, quotesFailed: quotes.length === 0 });
     } catch (e) {
       console.warn('quotes API failed', e);
       this.setState({ quotesFailed: true });
@@ -573,7 +653,7 @@ class Component extends DCLogic {
         [...artItems.map((art) => art.img), ...recentUrls],
         48
       );
-      this.setState({ artItems, artFailed: artItems.length === 0 });
+      this.setState({ artItems, artIndex: 0, artFailed: artItems.length === 0 });
     } catch (e) {
       console.warn('art fetch failed', e);
       this.setState({ artFailed: true });
@@ -659,6 +739,22 @@ class Component extends DCLogic {
       border: hot ? 'rgba(255,126,200,0.4)' : 'rgba(255,255,255,0.08)',
       accent: hot ? '#ff7ec8' : '#7ee3ff'
     });
+    const schedule = this.state.schedule
+      ? this.state.schedule.map((d) => mkDay(d.name, d.what, d.time, d.hot))
+      : [
+          mkDay('MON', 'Neuro solo stream', '~1 PM ET', false),
+          mkDay('TUE', 'Evil takes over', '~1 PM ET', false),
+          mkDay('WED', 'Karaoke night', '~1 PM ET', true),
+          mkDay('THU', 'Collabs & chaos', '~1 PM ET', false),
+          mkDay('FRI', 'Gaming w/ Vedal', '~1 PM ET', false),
+          mkDay('SAT', 'Variety chaos', '~1 PM ET', true),
+          mkDay('SUN', 'Rest day (she refuses)', '\u2014', false)
+        ];
+    const mobileSchedule = MobileInteractions.upcomingDays(
+      schedule,
+      new Date().getDay(),
+      this.state.showFullSchedule ? 7 : 3
+    );
 
     return {
       heroImgRef: this.heroImgRef,
@@ -690,9 +786,18 @@ class Component extends DCLogic {
         ...q,
         onPlay: () => this.setState({ activeVideo: q })
       })),
+      quoteIndex: this.state.quoteIndex,
+      quoteTrackStyle: '--carousel-index: ' + this.state.quoteIndex,
+      onQuotePointerDown: this.onQuotePointerDown,
+      onQuotePointerUp: this.onQuotePointerUp,
+      onQuotePointerCancel: this.onQuotePointerCancel,
+      onPreviousQuote: () => this.moveQuote(-1),
+      onNextQuote: () => this.moveQuote(1),
+      quotePreviousDisabled: this.state.quoteIndex <= 0,
+      quoteNextDisabled: this.state.quoteIndex >= this.state.quotes.length - 1,
       quotesFailed: this.state.quotesFailed,
       onShuffleQuotes: () => {
-        if (this.allQuotes && this.allQuotes.length) this.setState({ quotes: this.shuffle(this.allQuotes).slice(0, 8) });
+        if (this.allQuotes && this.allQuotes.length) this.setState({ quotes: this.shuffle(this.allQuotes).slice(0, 8), quoteIndex: 0 });
       },
       hasActiveVideo: !!this.state.activeVideo,
       activeIsMp4: !!this.state.activeVideo && /\.mp4(\?|$)/i.test(this.state.activeVideo.url),
@@ -705,22 +810,29 @@ class Component extends DCLogic {
         ...art,
         onError: () => this.setState((state) => {
           const artItems = state.artItems.filter((item) => item.img !== art.img);
-          return { artItems, artFailed: artItems.length === 0 };
+          return {
+            artItems,
+            artIndex: MobileInteractions.clampIndex(state.artIndex, artItems.length),
+            artFailed: artItems.length === 0
+          };
         })
       })),
+      artIndex: this.state.artIndex,
+      artTrackStyle: '--carousel-index: ' + this.state.artIndex,
+      onArtPointerDown: this.onArtPointerDown,
+      onArtPointerUp: this.onArtPointerUp,
+      onArtPointerCancel: this.onArtPointerCancel,
+      onPreviousArt: () => this.moveArt(-1),
+      onNextArt: () => this.moveArt(1),
+      artPreviousDisabled: this.state.artIndex <= 0,
+      artNextDisabled: this.state.artIndex >= this.state.artItems.length - 1,
       artFailed: this.state.artFailed,
       scheduleNote: this.state.schedule ? 'live from the official Twitch schedule (times shown in your timezone)' : 'indicative schedule',
-      schedule: this.state.schedule
-        ? this.state.schedule.map((d) => mkDay(d.name, d.what, d.time, d.hot))
-        : [
-            mkDay('MON', 'Neuro solo stream', '~1 PM ET', false),
-            mkDay('TUE', 'Evil takes over', '~1 PM ET', false),
-            mkDay('WED', 'Karaoke night', '~1 PM ET', true),
-            mkDay('THU', 'Collabs & chaos', '~1 PM ET', false),
-            mkDay('FRI', 'Gaming w/ Vedal', '~1 PM ET', false),
-            mkDay('SAT', 'Variety chaos', '~1 PM ET', true),
-            mkDay('SUN', 'Rest day (she refuses)', '\u2014', false)
-          ],
+      schedule,
+      mobileSchedule,
+      scheduleExpanded: this.state.showFullSchedule,
+      scheduleToggleLabel: this.state.showFullSchedule ? 'Show less' : 'View full week',
+      onToggleSchedule: () => this.setState((state) => ({ showFullSchedule: !state.showFullSchedule })),
       onGifClick: () => {
         const nextIndex = ImageRandomizer.pickDifferentIndex(this.gifs.length, this.state.heroGifIndex);
         if (this.heroImgRef.current) this.heroImgRef.current.src = this.gifs[nextIndex];
