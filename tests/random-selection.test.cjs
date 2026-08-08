@@ -142,6 +142,23 @@ test('mobile carousels expose swipe and accessible arrow controls', () => {
   assert.match(html, /onPointerDown="\{\{ onQuotePointerDown \}\}"/);
   assert.match(html, /aria-label="Previous quote clip"/);
   assert.match(html, /aria-label="Next fan art"/);
+  assert.match(html, /aria-label="Previous quote clip"[^>]*onKeyDown="\{\{ onPreviousQuoteKeyDown \}\}"/);
+  assert.match(html, /aria-label="Next fan art"[^>]*onKeyDown="\{\{ onNextArtKeyDown \}\}"/);
+});
+
+test('carousel keyboard handler activates only Enter and Space', () => {
+  const component = createComponent();
+  let activations = 0;
+  let prevented = 0;
+  const activate = () => { activations += 1; };
+  const event = (key) => ({ key, preventDefault() { prevented += 1; } });
+
+  component.onCarouselKeyDown(event('Enter'), activate);
+  component.onCarouselKeyDown(event(' '), activate);
+  component.onCarouselKeyDown(event('ArrowRight'), activate);
+
+  assert.equal(activations, 2);
+  assert.equal(prevented, 2);
 });
 
 test('mobile schedule exposes compact expandable content', () => {
@@ -202,4 +219,8 @@ test('mobile schedule cards contain long unbroken titles', () => {
 
 test('mobile about section clips transformed artwork without widening the page', () => {
   assert.match(html, /#about\s*\{\s*overflow:\s*hidden/);
+});
+
+test('page clips animated decoration at the root viewport', () => {
+  assert.match(html, /html\s*\{[^}]*overflow-x:\s*hidden/s);
 });
